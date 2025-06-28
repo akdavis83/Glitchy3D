@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glitch Cube 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff41;
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .cube {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 4s infinite linear, glitchRotate 0.1s infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            25% { transform: rotateX(90deg) rotateY(90deg) rotateZ(0deg); }
+            50% { transform: rotateX(180deg) rotateY(180deg) rotateZ(90deg); }
+            75% { transform: rotateX(270deg) rotateY(270deg) rotateZ(180deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        @keyframes glitchRotate {
+            0%, 90% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            5% { transform: rotateX(2deg) rotateY(-1deg) rotateZ(1deg); }
+            10% { transform: rotateX(-1deg) rotateY(2deg) rotateZ(-1deg); }
+            15% { transform: rotateX(1deg) rotateY(-2deg) rotateZ(2deg); }
+        }
+
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            animation: glitchFace 2s infinite;
+        }
+
+        @keyframes glitchFace {
+            0%, 85% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            }
+            86% {
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+                box-shadow: 0 0 20px rgba(255, 0, 65, 0.5);
+            }
+            88% {
+                transform: translate(2px, -2px);
+                filter: hue-rotate(180deg);
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            }
+            90% {
+                transform: translate(-1px, -1px);
+                filter: hue-rotate(270deg);
+                box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+            }
+        }
+
+        .front { transform: rotateY(0deg) translateZ(100px); }
+        .back { transform: rotateY(180deg) translateZ(100px); }
+        .right { transform: rotateY(90deg) translateZ(100px); }
+        .left { transform: rotateY(-90deg) translateZ(100px); }
+        .top { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        .front::before { content: "3D"; }
+        .back::before { content: "CUBE"; }
+        .right::before { content: "GLITCHY"; }
+        .left::before { content: "GLITCHY"; }
+        .top::before { content: "3D"; }
+        .bottom::before { content: "CUBE"; }
+
+        /* Glitch overlay */
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+            animation: scanLine 3s infinite linear;
+        }
+
+        @keyframes scanLine {
+            0% { top: 0%; opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { top: 100%; opacity: 1; }
+        }
+
+        /* Digital noise effect */
+        .noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><filter id="noise"><feTurbulence baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            animation: noise 0.2s infinite;
+        }
+
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-1px, 1px); }
+            20% { transform: translate(1px, -1px); }
+            30% { transform: translate(-1px, -1px); }
+            40% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, 1px); }
+            60% { transform: translate(1px, -1px); }
+            70% { transform: translate(-1px, -1px); }
+            80% { transform: translate(1px, 1px); }
+            90% { transform: translate(-1px, 1px); }
+        }
+
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff41;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ff41;
+            animation: titleGlitch 3s infinite;
+            z-index: 5;
+        }
+
+        @keyframes titleGlitch {
+            0%, 92% {
+                transform: translateX(-50%);
+                filter: hue-rotate(0deg);
+            }
+            93% {
+                transform: translateX(-50%) translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            94% {
+                transform: translateX(-50%) translate(2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            95% {
+                transform: translateX(-50%) translate(-1px, -1px);
+                filter: hue-rotate(270deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="noise"></div>
+    <div class="glitch-overlay">
+        <div class="scan-line"></div>
+    </div>
+    
+    <h1 class="title">IT WAS JUST A GLITCH IN THE MATRIX...</h1>
+    
+    <div class="container">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Add random glitch effects
+        function addRandomGlitches() {
+            const cube = document.querySelector('.cube');
+            const faces = document.querySelectorAll('.face');
+            
+            setInterval(() => {
+                // Random glitch intensity
+                if (Math.random() < 0.1) {
+                    cube.style.filter = `hue-rotate(${Math.random() * 360}deg) saturate(${Math.random() * 3})`;
+                    setTimeout(() => {
+                        cube.style.filter = 'none';
+                    }, 100);
+                }
+                
+                // Random face displacement
+                if (Math.random() < 0.05) {
+                    faces.forEach(face => {
+                        face.style.transform += ` translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+                        setTimeout(() => {
+                            face.style.transform = face.style.transform.replace(/translate\([^)]*\)/g, '');
+                        }, 50);
+                    });
+                }
+            }, 100);
+        }
+
+        // Initialize effects
+        createParticles();
+        addRandomGlitches();
+
+        // Add mouse interaction
+        document.addEventListener('mousemove', (e) => {
+            const cube = document.querySelector('.cube');
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            
+            cube.style.transform += ` rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+    </script>
+</body>
+</html>
